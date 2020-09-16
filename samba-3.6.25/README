@@ -1,0 +1,37 @@
+
+Builds for Samba v3.x for ReadyNAS ARM platform.
+
+See ../README for sources of the SDK and dependent libraries.
+
+Cross-compilation was performed on the supported platform of Ubuntu 8.04
+(in a Virtual Machine).
+
+Target was arm-mv5sft-linux-gnueabi (using the SDK build tools).
+
+Many configuration tests that could not be performed on Ubuntu were
+compiled and run on an existing ReadyNAS NV+ v2 (to get accurate
+results), and then supplied to the build in a config.cache file.
+
+The configure parameters were chosen to provide as much of a
+"drop-in" replacement for the existing Samba server as possible,
+so that the existing Frontview config files could be used.
+As configured, only the smbd/nmbd binaries need to be replaced.  All
+other libraries and dependencies are located under /usr/local.
+
+The full configuration used for the Samba compilation are located
+in ../scripts/mods/samba3.mod and built with ../scripts/build
+
+Tarball can be extracted at / (binaries are all in usr/local),
+then just replace the original binaries in /usr/sbin (as root):
+
+mv /usr/sbin/smbd /usr/sbin/smbd.orig
+mv /usr/sbin/nmbd /usr/sbin/nmbd.orig
+ln -s /usr/local/sbin/smbd /usr/sbin/smbd
+ln -s /usr/local/sbin/nmbd /usr/sbin/nmbd
+
+and then restart the server:
+
+/etc/init.d/samba restart
+
+All the new libraries and loadable modules will load from /usr/local,
+but state and configuration should still work from frontview.
