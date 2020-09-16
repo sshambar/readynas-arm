@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+PKGS="attr acl gerr gcrypt tasn1 gtls e2fs krb5 pam sasl cups ldap"
+
+for pkg in $PKGS; do
+  echo building $pkg...
+  build $pkg all
+done
+
+echo "done!"

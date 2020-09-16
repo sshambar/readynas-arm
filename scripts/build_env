@@ -1,0 +1,36 @@
+
+# zip file containing SDK source files (optional)
+PKGSOURCE=$HOME/src/RND_V5.3.7_WW.src.zip
+
+# cross-compile tool directory
+CROSSDIR=/opt/sdk/targets/arm-mv5sft-linux-gnueabi/cross/bin
+
+# where the tarballs live, and sources are unzipped
+BUILDROOT=/home/devel/build
+
+# build platform (Ubuntu 8.04 on i686)
+BUILD=i686-pc-linux-gnu
+
+# target arch for readynas arm 5.x
+TARGET=arm-mv5sft-linux-gnueabi
+
+# temporary installation directory
+DESTDIR=/home/devel/dest
+
+# sysroot where TARGET libraries/includes that build tools use
+SYSROOT=/opt/sdk/targets/arm-mv5sft-linux-gnueabi/rootfs-native
+
+# non-empty to allow rm -rf DESTDIR before make install (optional)
+CLEAN_DESTDIR=1
+
+# sudo to this user for install to DESTDIR (optional)
+DESTDIR_OWNER=
+
+# sudo to this user for tar to SYSROOT (optional)
+SYSROOT_OWNER=nobody
+
+# non-empty to publish all files (rather than just those required for compiles)
+PUBLISH_ALL=
+
+# destination directory for binary tarballs (optional)
+TARDIR=$HOME/results

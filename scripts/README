@@ -1,0 +1,107 @@
+
+This is the build script I used to cross-compile and install
+the libraries/headers needed for cross-compiling new software.
+
+Make sure the build environment in ../README has been setup, and
+build script is in PATH (or run it directly)
+
+The build tool is configured in the file 'build_env' - which
+should set the following variables:
+
+  PKGSOURCE - zip file containing many source files (optional)
+  CROSSDIR - cross-compile tool directory (this is added to PATH)
+  BUILDROOT - root directory containing source code (tarballs and dirs)
+  BUILD - "platform" script is running on
+  TARGET - "platform" cross-compilers are building for
+  DESTDIR - temporary location to install to
+  SYSROOT - target system root filesystem
+  CLEAN_DESTDIR - non-empy to clean DESTDIR before install (optional)
+  DESTDIR_OWNER - sudo to this user for install to DESTDIR (optional)
+  SYSROOT_OWNER - sudo to this user for tar to SYSROOT (optional)
+  PUBLISH_ALL - non-empty to publish all files from DESTDIR (optional)
+  TARDIR - destination directory for binary tarballs (optional)
+
+The build script takes the <module> to build, and <phase> args:
+
+  config - (re-)run configure
+  build - config if required, then make
+  install - build, then make install to DESTDIR
+  publish - install if required, then copy files from DESTDIR to SYSROOT
+  tar - create binary tarball in TARDIR
+  all - perform "config build install publish"
+
+To config, build, install and publish the module "gerr", run:
+
+  build gerr all
+
+The build script modules are located in the mods directory, and
+contain all the patches and configuration options to cross-compile
+for the target platform.
+
+The modules should be installed in the following (dependency) order:
+
+attr - attr-2.4.44
+acl - acl-2.2.49
+gerr - libgpg-error-1.6
+gcrypt - libgcrypt11-1.4.5
+tasn1 - libtasn1-3-2.7
+gtls - gnutls26-2.8.6
+e2fs - e2fsprogs-1.41.12
+krb5 - krb5-1.8.3+dfsg
+pam - pam-1.1.1
+sasl - cyrus-sasl2-2.1.23.dfsg1
+cups - cupsys-1.1.14
+ldap - openldap-2.4.23
+
+The script build-deps will do this for you...
+
+New build modules can be created by creating files in the mods dir.
+
+Source tarballs for modules not in PKGSOURCE may be placed in
+the BUILDROOT directory, eg: samba-3.6.25.tgz
+
+mods/<name>.mod files must define the following 5 functions:
+
+  setup() - always called
+
+    Must call pkg_setup <dir>, eg:
+
+      pkg_setup pam-1.1.1
+
+    <dir> may also refer to <dir>.tgz, <dir>.tar.gz, <dir>.tar.bz2
+    or even directory in PKGSOURCE (if defined).  In those cases
+    if directory doesn't exist, it is extracted.
+
+  config() - patch and configure source
+
+    Current directory is <dir> passed to pkg_setup above.
+
+    Should call need_config <config-gen-file>, then pkg_config <args>, eg:
+
+      need_config include/config.h || return 0
+      <patch files if needed>
+      <prep config.cache if needed>
+      pkg_config --with-config-option=no
+
+    NOTE: pkg_config assumes standard configure and Makefile (may skip)
+
+  build() - perform build, eg: make
+
+  install() - install to DESTDIR
+
+    Should call need_install <file>, then perform make install, eg:
+
+      need_install /usr/include/installed_header.h || return 0
+      $DESTDIR_SUDO make install DESTDIR=$DESTDIR
+      <fix any installed files if needed>
+
+    Use $DESTDIR_SUDO for actions in DESTDIR
+
+  publish() - publish files from DESTDIR to SYSROOT
+
+    Should call pkg_publish [ <dirs>... ], eg:
+
+       pkg_publish usr/lib usr/include (this is the default if blank)
+
+    <dirs> should include directories required for other builds only.
+    Do not include leading / on <dirs>...

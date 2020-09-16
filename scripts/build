@@ -1,0 +1,197 @@
+#!/bin/bash
+# vim:set ft=sh et sw=2 ts=2:
+#
+# build v1.0 - cross-compile driver script
+# Author: Scott Shambarger <devel@shambarger.net>
+#
+# Copyright (C) 2020 Scott Shambarger
+
+# See the README for details on how to use the script.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# any failures kill script (functions depend on it!)
+set -e
+
+# shared functions for build scripts
+
+usage() {
+  local bin=${0##*/}
+  echo "Usage: $bin <module> <phase>..."
+  echo "  <phase> may be:"
+  echo "    config - configure (or re-run)"
+  echo "    build - make"
+  echo "    install - install to DESTDIR"
+  echo "    publish - publish to SYSROOT"
+  echo "    tar - create binary tarball in TARDIR"
+  echo "    all - perform all phases"
+  echo
+  echo "A listed phase will always be performed, but later phases only"
+  echo "trigger earlier phases if they're needed"
+  echo
+  echo "Configuration is in build_env file (same directory as $bin)"
+  echo "Modules are defined in <name>.mod files in mods sub-directory"
+
+  exit 1
+}
+
+fail() { # <msg>
+  echo "$1"
+  exit 1
+}
+
+pkg_setup() { # <source-directory> (may be a subdir, top dir used for extract)
+
+  if [ ! -d $BUILDROOT/$1 ]; then
+    cd $BUILDROOT
+    local pkg=${1%%/*}
+    echo "Looking for tarball for $pkg"
+    if [ -f $pkg.tgz ]; then
+      tar xvzf $pkg.tgz
+    elif [ -f $pkg.tar.gz ]; then
+      tar xvzf $pkg.tar.gz
+    elif [ -f $pkg.tar.bz2 ]; then
+      tar xvjf $pkg.tar.bz2
+    elif [ -n "$PKGSOURCE" -a -f "${PKGSOURCE%.zip}.zip" ]; then
+      # unzip may fail, but still inflate source
+      unzip "${PKGSOURCE%.zip}.zip" $pkg/\* || :
+      [ -d $1 ] || fail "$PKGSOURCE does not contain $1"
+    fi
+  fi
+  [ -d $BUILDROOT/$1 ] || fail "source $BUILDROOT/$1 not found"
+  cd $BUILDROOT/$1
+  # used for tarballs
+  TAR_PACKAGE=${1%%/*}
+}
+
+need_config() { # <config-generated-file>
+  [[ $1 ]] || fail "need_config requires file arg"
+  # true if config required
+  [[ $DO_CONFIG ]] || [ ! -f "$1" ]
+}
+
+pkg_config() { # <config-args>... (may override things like --prefix=)
+  set -x
+  ./configure --build=$BUILD --host=$TARGET --prefix=/usr --sysconfdir=/etc --localstatedir=/var "$@"
+  make clean
+  set +x
+}
+
+destdir_owner_is_root() {
+  # true if DESTDIR_OWNER is root, or unset and current user is root
+  if [ -n "$DESTDIR_OWNER" ]; then
+    [ "$DESTDIR_OWNER" = root -o "$DESTDIR_OWNER" = 0 ] && return 0 || :
+  fi
+  [ $(id -u) -eq 0 ]
+}
+
+clean_destdir() {
+  # no quotes, DESTDIR should not have spaces or special chars
+  [ -d $DESTDIR ] || fail "\$DESTDIR not a directory! ($DESTDIR)"
+  [[ $CLEAN_DESTDIR ]] && [ $DESTDIR != / -a -w $DESTDIR ] && \
+    { echo "Cleaning $DESTDIR" && $DESTDIR_SUDO rm -rf $DESTDIR/*; } || :
+}
+
+need_install() { # <installed-file> (relative to DESTDIR)
+  [[ $1 ]] || fail "need_install requires file arg"
+
+  # returns true if install required
+  [ -d $DESTDIR ] || fail "\$DESTDIR not a directory! ($DESTDIR)"
+  { [[ $DO_INSTALL ]] || [ ! -f "${DESTDIR%/}$1" ]; } && clean_destdir
+}
+
+pkg_publish() { # <dir>...
+  echo
+  echo "Build products in $DESTDIR"
+  [[ $1 ]] || set usr/include usr/lib
+  [[ $PUBLISH_ALL ]] && set . || :
+  [[ $DO_PUBLISH ]] || {
+    echo "Run the following to publish files to SYSROOT"
+    echo "$DESTDIR_SUDO tar c -C $DESTDIR $@ | $SYSROOT_SUDO tar xv -C $SYSROOT"
+    return
+  }
+  echo
+  [[ $CREATE_TAR ]] || {
+    echo "Publishing the installed from $DESTDIR to $SYSROOT"
+    $DESTDIR_SUDO tar c -C $DESTDIR "$@" | $SYSROOT_SUDO tar xv -C $SYSROOT
+    return 0
+  }
+
+  echo "Creating tarball $TAR_PACKAGE.tgz in $TARDIR"
+  tar czf "$TARDIR/$TAR_PACKAGE.tgz" -C $DESTDIR "$@"
+}
+
+# load our environment
+EXEDIR=${0%/*}; EXEDIR=${EXEDIR:-.}
+MODDIR=$EXEDIR/mods
+[ -d "$MODDIR" ] || fail "No mods directory found in $EXEDIR"
+[ -r "$EXEDIR/build_env" ] || fail "build_env not found in $EXEDIR"
+
+. "$EXEDIR/build_env"
+
+[[ $CROSSDIR ]] && [[ $BUILDROOT ]] && [[ $BUILD ]] && [[ $TARGET ]] && \
+  [[ $DESTDIR ]] && [[ $SYSROOT ]] || fail "Setup environment in build_env!"
+
+# specifically checking directories without quotes as Makefile's can't
+# handle directories with spaces etc...
+[ -d $CROSSDIR ] || fail "CROSSDIR not a directory ($CROSSDIR)"
+[ -d $BUILDROOT ] || fail "BUILDROOT not a directory ($BUILDROOT)"
+[ -d $DESTDIR ] || fail "DESTDIR not a directory ($DESTDIR)"
+[ -d $SYSROOT ] || fail "SYSROOT not a directory ($SYSROOT)"
+
+# add PATH so make install can call target ranlib etc...
+[[ $DESTDIR_OWNER ]] && DESTDIR_SUDO="sudo -u $DESTDIR_OWNER PATH=$PATH" || :
+[[ $SYSROOT_OWNER ]] && SYSROOT_SUDO="sudo -u $SYSROOT_OWNER" || :
+
+[[ $1 ]] && [[ $2 ]] || usage
+
+PACKAGE=$1
+shift
+
+[ "$1" = all ] && set config build install publish || :
+
+DO_CONFIG= DO_BUILD= DO_INSTALL= DO_PUBLISH= CREATE_TAR=
+while [[ $1 ]]; do
+  case $1 in
+    config) DO_CONFIG=1;;
+    build) DO_BUILD=1;;
+    install) DO_INSTALL=1;;
+    publish) DO_PUBLISH=1;;
+    tar) DO_PUBLISH=1; CREATE_TAR=1; PUBLISH_ALL=1
+      [[ $TARDIR ]] || fail "TARDIR not defined!"
+      [ -d "$TARDIR" ] || fail "TARDIR not a directory! ($TARDIR)";;
+    *) usage;;
+  esac
+  shift
+done
+
+[ -r "$MODDIR/$PACKAGE.mod" ] || \
+  fail "Unknown package $PACKAGE (missing mods/$PACKAGE.mod file?)"
+
+PATH=${PATH}:$CROSSDIR
+
+. "$MODDIR/$PACKAGE.mod"
+
+setup
+
+config
+[[ $DO_BUILD ]] || [[ $DO_INSTALL ]] || [[ $DO_PUBLISH ]] || exit 0
+
+build
+[[ $DO_INSTALL ]] || [[ $DO_PUBLISH ]] || exit 0
+
+install
+
+# always call publish (for install message if not publishing)
+publish

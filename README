@@ -1,0 +1,24 @@
+Builds of for ReadyNAS on ARM.
+
+These builds are targeted to classic ReadyNAS ARM running RAIDiator 5.3.
+
+As community add-ons are no longer supplied by Netgear, these builds
+allow running newer versions of open source software compiled
+using the ReadyNAS SDK 3.3, and installed using headers/libraries
+compiled from the ReadyNAS GPL tarballs.
+
+The ARM SDK and GPL source files where obtained from:
+
+http://www.readynas.com/download/GPL/index.php
+
+SDK (eg. sdk3.3-ct-ng-1.4.1-arm-mv5sft-linux-gnueabi-1535-25-01-2011.tar.bz2)
+should be installed in /opt/sdk.  Then follow the installation instructions in
+/opt/sdk/README-SDK.html.
+
+Native ARM filesystem (eg. sdk3.3-genericfs-arm-mv5sft.tar.bz2) should
+be extracted to /opt/sdk/targets/arm-mv5sft-linux-gnueabi/rootfs-native
+
+Depedencies can be built using the script scripts/build.  See the README
+in scripts for how to setup and run the script.
+
+Binary tarballs can be found in directories named for the software.
