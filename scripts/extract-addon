@@ -1,0 +1,57 @@
+#!/bin/bash
+
+fail() { echo "$*" >&2 ; exit 1; }
+
+INPUT=$1 DESTDIR=$2
+[ -z "$INPUT" -o -z "$DESTDIR" ] && fail "Usage: ${0##*/} <input-file> <output-dir>"
+[ -f "$INPUT" ] || fail "$INPUT: not found"
+[ -d "$DESTDIR" ] || { mkdir -p "$DESTDIR" || fail "$DESTDIR: unable to create directory"; }
+
+IFS=, read -d '' -a INDEX < "$INPUT" || fail "Failed to read $INPUT"
+
+# check addon::
+[[ ${INDEX[0]} =~ ^addon:: ]] || fail "$INPUT: not an addon file!"
+
+# strip addon::
+INDEX[0]=${INDEX[0]#addon::}
+
+# assign known index values
+for var in "${INDEX[@]}"; do
+  name=${var%%=*}
+  val=${var#*=}
+  case $name in
+    name) FRIENDLY_NAME=$val; NAME=$(echo $FRIENDLY_NAME | sed 's/ //g');;
+    version) VERS=$val;;
+    size) SIZE=$val;;
+    md5sum) MD5=$val;;
+    unencrypted) [ $val = "1" ] || fail "Unable to handle encrypted addons";;
+    api) [ $val = "1" ] || fail "Unknown file API $val";;
+    arch) arch=$val;;
+    min_raidiator_version) MIN_RAIDIATOR_VERSION=$val;;
+    skipreboot) SKIP_REBOOT=$val;;
+    restartapache) RESTART_APACHE=$val;;
+  esac
+done
+
+case $arch in
+  nsp) bs=512;;
+  x86|arm) bs=16384;;
+  *) fail "Unknown arch $arch";;
+esac
+
+OUTPUT="$DESTDIR/${NAME}_${VERS}.tar"
+dd if="$INPUT" bs=$bs skip=1 of="$OUTPUT" 2>/dev/null || \
+  fail "$INPUT: failed to extract tar to $OUTPUT"
+
+getsize() { set -- $(ls -dn "$1") && echo $5; }
+NSIZE=$(getsize "$OUTPUT")
+
+[[ $SIZE = $NSIZE ]] || fail "Embedded tar $NSIZE bytes, header says $SIZE bytes"
+
+tar xf "$OUTPUT" -C "$DESTDIR" || fail "$OUTPUT: tar appears corrupt"
+
+[ -f "$DESTDIR/files.tgz" ] || fail "$OUTPUT: missing files.tgz"
+
+tar xzf "$DESTDIR/files.tgz" -C "$DESTDIR" || fail "$DESTDIR/files.tgz: tar appears corrupt"
+
+exit 0
