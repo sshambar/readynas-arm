@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<addon>
+  <name>SAMBA36</name>
+  <friendly_name>Samba 36</friendly_name>
+  <version>3.6.25-1</version>
+  <detail_url>https://github.com/sshambar/readynas-arm/</detail_url>
+  <author>Scott Shambarger</author>
+  <get_url>SAMBA36_HANDLER.pl</get_url>
+  <set_url>SAMBA36_HANDLER.pl</set_url>
+  <preaction>SAMBA36_preaction</preaction>
+  <onloadaction>SAMBA36_onloadaction</onloadaction>
+  <current_url>https://github.com/sshambar/readynas-arm/releases/download/samba-addon/SAMBA36_CURRENT.xml</current_url>
+  <min_raidiator_version>5.3.1</min_raidiator_version>
+</addon>
+

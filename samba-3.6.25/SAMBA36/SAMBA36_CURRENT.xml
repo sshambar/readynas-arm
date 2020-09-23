@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<addon>
+  <version>3.6.25-1</version>
+  <download_url>https://github.com/sshambar/readynas-arm/releases/download/Samba36-3.6.25-1/Samba36_3.6.25-1.bin</download_url>
+  <message>
+    <en-us>
+      <![CDATA[Initial release.]]>
+    </en-us>
+  </message>
+  <min_raidiator_version>5.3.1</min_raidiator_version>
+</addon>

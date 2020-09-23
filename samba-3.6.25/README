@@ -3,6 +3,10 @@ Builds for Samba v3.x for ReadyNAS ARM platform.
 
 See ../README for sources of the SDK and dependent libraries.
 
+===
+
+Release Tarballs
+
 Cross-compilation was performed on the supported platform of Ubuntu 8.04
 (in a Virtual Machine).
 
@@ -35,3 +39,46 @@ and then restart the server:
 
 All the new libraries and loadable modules will load from /usr/local,
 but state and configuration should still work from frontview.
+
+===
+
+Debian Package
+
+The debian package is created by extracting samba-3.6.25.tgz in
+samba36-addon, removing the unused etc/ and var/ directories, and
+then running (fakeroot) dpkg-deb -b samba36-addon.
+
+The resulting package can be installed on the ReadyNAS using:
+
+dpkg -i samba36-addon.deb
+
+The install scripts will create the symlinks to smbd/nmbd
+(described above) on install unless the DISABLE_ACTIVATION=1
+environment variable is set.
+
+The symlinks are removed (.orig files are restored if still present)
+on package removal.
+
+NOTE: yes, installing to /usr/local is "not good" - but installing
+into /usr would conflict with the native smbd, and installing
+to /opt would require adding files to /etc/ld.so.conf.d and
+the Samba tools would not be in the default PATH... so I'm
+breaking the rules to keep things simple ;)
+
+===
+
+ReadyNAS Add-On
+
+The add-on is created using the ReadyNAS Add-On SDK, and will
+perform the Debian package install and handle the creation
+and removal of the smbd/nmbd symlinks when the Add-On is
+enabled or disabled respectively.
+
+In addition, the add-on includes an option to enable/disable
+the SMB2 protocol (enabled by default) when the add-on is
+active.
+
+You can use the included Makefile for much of the work, and
+it will build the Debian package, and create the add-on
+(providing samba-3.6.25.tgz is present, and the Add-On SDK
+is installed, and patched).

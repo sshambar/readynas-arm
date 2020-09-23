@@ -1,0 +1,11 @@
+Package: samba36-addon
+Priority: extra
+Section: checkinstall
+Maintainer: Scott Shambarger <devel@shambarger.net>
+Architecture: armel
+Version: 3.6.25-1
+Depends: samba-common
+Description: Alternative Samba Suite for ReadyNAS
+ Provides an alternative Samba Suite installed in /usr/local that
+ can be enabled as the default SMB server from the Frontview Add-On
+ page.  The native Samba configuration files and caches are all used.

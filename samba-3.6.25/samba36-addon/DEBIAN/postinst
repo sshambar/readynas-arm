@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -e
+
+backup_file() {
+  file=$1
+  [ ! -h $file ] || return 0
+  # backup original smbd
+  [ -f $file -a ! -f ${file}.orig ] && cp -a $file ${file}.orig || :
+}
+
+backup_file /usr/sbin/smbd
+backup_file /usr/sbin/nmbd
+
+# DISABLE_ACTIVATION skips symlink/restart on install
+if [ -z "$DISABLE_ACTIVATION" ]; then
+
+  # create symlink to new smbd
+  rm -f /usr/sbin/smbd
+  ln -s /usr/local/sbin/smbd /usr/sbin/smbd
+
+  # create symlink to new nmbd
+  rm -f /usr/sbin/nmbd
+  ln -s /usr/local/sbin/nmbd /usr/sbin/nmbd
+
+  # restart server if running
+  /etc/init.d/samba status &>/dev/null && /etc/init.d/samba restart || :
+fi
+
+exit 0

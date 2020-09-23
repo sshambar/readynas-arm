@@ -1,0 +1,2 @@
+LABEL_SERVICE_SAMBA36_INFO::::<b>Samba 3.6</b> Server and Client software to interoperate with Windows machines.
+PROMPT_SAMBA36_SMB2::::Enable SMB2 Protocol

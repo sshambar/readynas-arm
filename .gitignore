@@ -14,9 +14,9 @@
 .git-module-status
 
 # project related ignores
-/samba-3.6.25/samba-3.6.25.tgz
+*.tgz
+*.bin
 /samba-3.6.25/samba36-addon/usr/**
-/samba-3.6.25/SAMBA36/Samba36_*.bin
 /samba-3.6.25/SAMBA36/files/tmp/*
 /samba-3.6.25/SAMBA36/files/etc/frontview/addons/bin/SAMBA36/*
 /samba-3.6.25/SAMBA36/files/etc/frontview/addons/ui/SAMBA36/*

@@ -1,0 +1,7 @@
+
+DETAIL_URL=https://github.com/sshambar/readynas-arm/
+CURRENT_URL=https://github.com/sshambar/readynas-arm/releases/download/samba-addon/SAMBA36_CURRENT.xml
+REBOOT_REQUIRED=n
+RESTART_APACHE=n
+MIN_RAIDIATOR_VERSION=5.3.1
+
