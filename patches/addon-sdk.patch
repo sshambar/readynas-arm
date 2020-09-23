@@ -1,0 +1,38 @@
+--- a/bin/build_addon	2012-02-06 11:30:53.000000000 -0800
++++ b/bin/build_addon	2020-09-23 09:00:38.000000000 -0700
+@@ -33,16 +33,18 @@
+   echo "Unknown target machine type.  This kit will only build ReadyNAS Padre, x86, and ARM platforms."
+   exit 1
+ fi
+-if ! [ -d "../bin" -a -d "../template" -a -d "files" ]; then
++prog_dir=${0%/*}
++prog_dir=${prog_dir}${prog_dir:+/}
++if ! [ -d "${prog_dir:-.}" -a -d "${prog_dir:-.}/../template" -a -d "files" ]; then
+   echo "This doesn't appear to be a valid Addon SDK base directory."
+   exit 1
+ fi
+ 
+-file=$(ls *.xml | grep -v "_" | head -1)
+-TAG=$(../bin/xmlutil.$harch $file /addon/name | awk -F'!!' '{ print $2 }')
+-FRIENDLY_NAME=$(../bin/xmlutil.$harch $file /addon/friendly_name | awk -F'!!' '{ print $2 }')
++file=$(ls *.xml | egrep -v "(_AVAILABLE|_CURRENT).xml" | head -1)
++TAG=$(${prog_dir}xmlutil.$harch $file /addon/name | awk -F'!!' '{ print $2 }')
++FRIENDLY_NAME=$(${prog_dir}xmlutil.$harch $file /addon/friendly_name | awk -F'!!' '{ print $2 }')
+ NAME=$(echo $FRIENDLY_NAME | sed 's/ //g')
+-VERS=$(../bin/xmlutil.$harch $file /addon/version | awk -F'!!' '{ print $2 }')
++VERS=$(${prog_dir}xmlutil.$harch $file /addon/version | awk -F'!!' '{ print $2 }')
+ START=/etc/frontview/addons/bin/$TAG/start.sh
+ STOP=/etc/frontview/addons/bin/$TAG/stop.sh
+ TIME=$(date +%s)
+@@ -101,9 +103,9 @@
+ cp ${TAG}.conf files/etc/frontview/apache/addons/${TAG}.conf
+ 
+ cd files || error 
+-tar cfz ../files.tgz ./* || error
++fakeroot tar cfz ../files.tgz ./* || error
+ cd ..
+-tar cf ${NAME}_${VERS}.tar install.sh remove.sh addons.conf files.tgz || error
++fakeroot tar cf ${NAME}_${VERS}.tar install.sh remove.sh addons.conf files.tgz || error
+ 
+ SIZE=`stat -t ${NAME}_${VERS}.tar | awk '{ print $2 }'`
+ MD5=`md5sum ${NAME}_${VERS}.tar | awk '{ print $1 }'`

@@ -21,4 +21,27 @@ be extracted to /opt/sdk/targets/arm-mv5sft-linux-gnueabi/rootfs-native
 Depedencies can be built using the script scripts/build.  See the README
 in scripts for how to setup and run the script.
 
-Binary tarballs can be found in directories named for the software.
+---
+
+ReadyNAS Add-on Development
+
+The Netgear Add-on SDK is only available from the Internet Archive.
+A description of how to use the SDK can be found at:
+
+https://web.archive.org/web/20150912002632/http://www.readynas.com/?p=346
+
+The actual SDK files can be downloaded from:
+
+https://web.archive.org/web/20150912002632/http://www.readynas.com/download/addons/addons_sdk.tgz
+
+There's also a script to use the SDK to build add-ons: scripts/build-addon
+
+NOTE: the SDK bin/build_addon needs to be patched to use fakeroot and
+allow building addons outside the SDK directory. The patch is in
+patches/addon-sdk.patch, so use:
+
+cd {addon-sdk-directory}
+patch -p1 < {path-to-addon-sdk.patch}
+
+There's also a (optional) patch I created for the templates in
+patches/addon-sdk-template.patch

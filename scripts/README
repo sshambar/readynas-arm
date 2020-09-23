@@ -1,6 +1,9 @@
 
-This is the build script I used to cross-compile and install
+"build" is the build script I used to cross-compile and install
 the libraries/headers needed for cross-compiling new software.
+
+"build-addon" can be used by ReadyNAS add-on Makefiles to
+create add-on .bin files using the ReadyNAS Add-on SDK.
 
 Make sure the build environment in ../README has been setup, and
 build script is in PATH (or run it directly)

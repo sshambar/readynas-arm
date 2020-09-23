@@ -1,0 +1,29 @@
+#!/bin/bash
+
+BUILD_SCRIPT=$HOME/addons_sdk/bin/build_addon
+
+die() {
+  echo "$*"
+  exit 1
+}
+
+for file in .*_BUILD_SETTINGS; do
+  TAG_NAME=${file%_BUILD_SETTINGS}
+done
+TAG_NAME=${TAG_NAME#.}
+[ -n "$TAG_NAME" ] || die "Not in an addon directory!"
+
+# create any missing directories
+for dir in "files/etc/frontview/addons/bin/$TAG_NAME" "files/etc/frontview/addons/ui/$TAG_NAME" "files/etc/frontview/apache/addons"; do
+  [ -d "$dir" ] || mkdir -p "$dir"
+done
+
+if [ "$1" = clean ]; then
+  find files/etc/frontview/addons -type f -delete
+  find files/etc/frontview/apache -type f -delete
+  exit
+fi
+
+[ -x "$BUILD_SCRIPT" ] || die "Unable to locate build_addon (set BUILD_SCRIPT)"
+
+TARGET_MACHTYPE=arm "$BUILD_SCRIPT"

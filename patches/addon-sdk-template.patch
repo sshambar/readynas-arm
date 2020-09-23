@@ -1,0 +1,62 @@
+diff --git a/template/ADDON.xml b/template/ADDON.xml
+index fbf9107..10f096c 100755
+--- a/template/ADDON.xml
++++ b/template/ADDON.xml
+@@ -5,8 +5,8 @@
+   <version>%VERSION%</version>
+   <detail_url>%DETAIL_URL%</detail_url>
+   <author>%AUTHOR%</author>
+-  <get_url>/addons/%ADDON%_HANDLER.pl</get_url>
+-  <set_url>/addons/%ADDON%_HANDLER.pl</set_url>
++  <get_url>%ADDON%_HANDLER.pl</get_url>
++  <set_url>%ADDON%_HANDLER.pl</set_url>
+   <preaction>%ADDON%_preaction</preaction>
+   <onloadaction>%ADDON%_onloadaction</onloadaction>
+   <current_url>%CURRENT_URL%</current_url>
+diff --git a/template/install.sh b/template/install.sh
+index 9e58f20..81615bd 100755
+--- a/template/install.sh
++++ b/template/install.sh
+@@ -36,7 +36,7 @@ tar --no-overwrite-dir -xzf $orig_dir/files.tgz || bye "ERROR: Could not extract
+ # Add ourself to the main addons.conf file
+ [ -d $ADDON_HOME ] || mkdir $ADDON_HOME
+ chown -R admin.admin $ADDON_HOME
+-grep -v ^$name $ADDON_HOME/addons.conf >/tmp/addons.conf$$ 2>/dev/null
++grep -sv "^${name}\!\!" $ADDON_HOME/addons.conf >/tmp/addons.conf$$
+ cat $orig_dir/addons.conf >>/tmp/addons.conf$$ || bye "ERROR: Could not include addon configuration."
+ cp /tmp/addons.conf$$ $ADDON_HOME/addons.conf || bye "ERROR: Could not update addon configuration."
+ rm -f /tmp/addons.conf$$ || bye "ERROR: Could not clean up."
+@@ -45,7 +45,7 @@ rm -f /tmp/addons.conf$$ || bye "ERROR: Could not clean up."
+ cp $orig_dir/remove.sh $ADDON_HOME/${name}.remove
+ 
+ # Turn ourselves on in the services file
+-grep -v ^$name /etc/default/services >/tmp/services$$ || bye "ERROR: Could not back up service configuration."
++grep -v "^${name}[_=]" /etc/default/services >/tmp/services$$ || bye "ERROR: Could not back up service configuration."
+ echo "${name}_SUPPORT=1" >>/tmp/services$$ || bye "ERROR: Could not add service configuration."
+ cp /tmp/services$$ /etc/default/services || bye "ERROR: Could not update service configuration."
+ rm -f /tmp/services$$ || bye "ERROR: Could not clean up."
+@@ -72,4 +72,7 @@ friendly_name=`awk -F'!!' '{ print $2 }' $orig_dir/addons.conf`
+ cd /
+ rm -rf $orig_dir
+ 
++# Reread modified service configuration files
++killall -USR1 apache-ssl
++
+ exit 0
+diff --git a/template/remove.sh b/template/remove.sh
+index 1efb25d..703114d 100644
+--- a/template/remove.sh
++++ b/template/remove.sh
+@@ -29,8 +29,10 @@ sed -i "/^${SERVICE}[_=]/d" /etc/default/services
+ # Remove entry from addons.conf file
+ sed -i "/^${SERVICE}\!\!/d" /etc/frontview/addons/addons.conf
+ 
+-# Reread modified service configuration files
+-killall -USR1 apache-ssl
++if ! [ "$1" = "-upgrade" ]; then
++  # Reread modified service configuration files
++  killall -USR1 apache-ssl
++fi
+ 
+ # Now remove ourself
+ rm -f $0
