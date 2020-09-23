@@ -28,7 +28,7 @@ set -e
 
 usage() {
   local bin=${0##*/}
-  echo "Usage: $bin <module> <phase>..."
+  echo "Usage: $bin <module> <phase>... [ NAME=\"value\"... ]"
   echo "  <phase> may be:"
   echo "    config - configure (or re-run)"
   echo "    build - make"
@@ -42,6 +42,9 @@ usage() {
   echo
   echo "Configuration is in build_env file (same directory as $bin)"
   echo "Modules are defined in <name>.mod files in mods sub-directory"
+  echo
+  echo "build_env variables may be overridden by appending NAME=\"value\""
+  echo "assignments anyplace after <module>"
 
   exit 1
 }
@@ -72,7 +75,7 @@ pkg_setup() { # <source-directory> (may be a subdir, top dir used for extract)
   [ -d $BUILDROOT/$1 ] || fail "source $BUILDROOT/$1 not found"
   cd $BUILDROOT/$1
   # used for tarballs
-  TAR_PACKAGE=${1%%/*}
+  TAR_PACKAGE=${1%%/*}-${TARGET%%-*}
 }
 
 need_config() { # <config-generated-file>
@@ -129,7 +132,8 @@ pkg_publish() { # <dir>...
   }
 
   echo "Creating tarball $TAR_PACKAGE.tgz in $TARDIR"
-  tar czf "$TARDIR/$TAR_PACKAGE.tgz" -C $DESTDIR "$@"
+  FAKEROOT=$(command -v fakeroot || :)
+  $FAKEROOT tar czf "$TARDIR/$TAR_PACKAGE.tgz" -C $DESTDIR "$@"
 }
 
 # load our environment
@@ -171,6 +175,12 @@ while [[ $1 ]]; do
     tar) DO_PUBLISH=1; CREATE_TAR=1; PUBLISH_ALL=1
       [[ $TARDIR ]] || fail "TARDIR not defined!"
       [ -d "$TARDIR" ] || fail "TARDIR not a directory! ($TARDIR)";;
+    *=*)
+      VARNAME_=${1%%=*}
+      [ "${VARNAME_/ //}" = "$VARNAME_" ] || die "bad env name $VARNAME_"
+      eval $VARNAME_=\"${1#*=}\"
+      unset VARNAME_
+      ;;
     *) usage;;
   esac
   shift
