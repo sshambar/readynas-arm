@@ -1,6 +1,7 @@
 #!/bin/bash
 
-BUILD_SCRIPT=$HOME/addons_sdk/bin/build_addon
+# set BUILD_ADDON manually if not in PATH
+BUILD_ADDON=$(command -v build_addon)
 
 die() {
   echo "$*"
@@ -24,6 +25,6 @@ if [ "$1" = clean ]; then
   exit
 fi
 
-[ -x "$BUILD_SCRIPT" ] || die "Unable to locate build_addon (set BUILD_SCRIPT)"
+[ -x "$BUILD_ADDON" ] || die "Unable to locate build_addon (set BUILD_ADDON)"
 
-TARGET_MACHTYPE=arm "$BUILD_SCRIPT"
+TARGET_MACHTYPE=arm "$BUILD_ADDON"
