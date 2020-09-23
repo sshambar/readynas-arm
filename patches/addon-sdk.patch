@@ -24,7 +24,16 @@
  START=/etc/frontview/addons/bin/$TAG/start.sh
  STOP=/etc/frontview/addons/bin/$TAG/stop.sh
  TIME=$(date +%s)
-@@ -101,9 +103,10 @@ fi
+@@ -93,6 +95,8 @@ chmod +x files/etc/frontview/addons/ui/${TAG}/${TAG}_HANDLER.pl
+ cp start.sh stop.sh running.sh files/etc/frontview/addons/bin/${TAG}/
+ (cd files/etc/frontview/addons/bin/${TAG}/; chmod +x start.sh stop.sh running.sh)
+ 
++[ -f ${TAG}.jpg ] && cp ${TAG}.jpg files/etc/frontview/addons/ui/${TAG}/
++
+ if [ -f ${TAG}_service ]; then
+   cp ${TAG}_service files/etc/frontview/addons/bin/${TAG}/
+   chmod +x files/etc/frontview/addons/bin/${TAG}/${TAG}_service
+@@ -101,9 +105,11 @@ fi
  cp ${TAG}.conf files/etc/frontview/apache/addons/${TAG}.conf
  
  cd files || error 
@@ -33,6 +42,7 @@
 +$FAKEROOT tar cfz ../files.tgz ./* || error
  cd ..
 -tar cf ${NAME}_${VERS}.tar install.sh remove.sh addons.conf files.tgz || error
++chmod +x install.sh remove.sh
 +$FAKEROOT tar cf ${NAME}_${VERS}.tar install.sh remove.sh addons.conf files.tgz || error
  
  SIZE=`stat -t ${NAME}_${VERS}.tar | awk '{ print $2 }'`
