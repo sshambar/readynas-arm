@@ -1,5 +1,3 @@
-diff --git a/template/ADDON.xml b/template/ADDON.xml
-index fbf9107..10f096c 100755
 --- a/template/ADDON.xml
 +++ b/template/ADDON.xml
 @@ -5,8 +5,8 @@

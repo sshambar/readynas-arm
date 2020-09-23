@@ -1,6 +1,6 @@
---- a/bin/build_addon	2012-02-06 11:30:53.000000000 -0800
-+++ b/bin/build_addon	2020-09-23 09:00:38.000000000 -0700
-@@ -33,16 +33,18 @@
+--- a/bin/build_addon
++++ b/bin/build_addon
+@@ -33,16 +33,18 @@ else
    echo "Unknown target machine type.  This kit will only build ReadyNAS Padre, x86, and ARM platforms."
    exit 1
  fi
@@ -24,15 +24,16 @@
  START=/etc/frontview/addons/bin/$TAG/start.sh
  STOP=/etc/frontview/addons/bin/$TAG/stop.sh
  TIME=$(date +%s)
-@@ -101,9 +103,9 @@
+@@ -101,9 +103,10 @@ fi
  cp ${TAG}.conf files/etc/frontview/apache/addons/${TAG}.conf
  
  cd files || error 
 -tar cfz ../files.tgz ./* || error
-+fakeroot tar cfz ../files.tgz ./* || error
++FAKEROOT=$(command -v fakeroot)
++$FAKEROOT tar cfz ../files.tgz ./* || error
  cd ..
 -tar cf ${NAME}_${VERS}.tar install.sh remove.sh addons.conf files.tgz || error
-+fakeroot tar cf ${NAME}_${VERS}.tar install.sh remove.sh addons.conf files.tgz || error
++$FAKEROOT tar cf ${NAME}_${VERS}.tar install.sh remove.sh addons.conf files.tgz || error
  
  SIZE=`stat -t ${NAME}_${VERS}.tar | awk '{ print $2 }'`
  MD5=`md5sum ${NAME}_${VERS}.tar | awk '{ print $1 }'`
