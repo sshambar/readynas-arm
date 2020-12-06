@@ -9,22 +9,29 @@ backup_file() {
   [ -f $file -a ! -f ${file}.orig ] && cp -a $file ${file}.orig || :
 }
 
+symlink_bin() {
+  file=$1
+  rm -f "/usr/sbin/$file"
+  ln -s "/usr/local/sbin/$file" "/usr/sbin/$file"
+}
+
 backup_file /usr/sbin/smbd
 backup_file /usr/sbin/nmbd
+backup_file /usr/sbin/winbindd
 
 # DISABLE_ACTIVATION skips symlink/restart on install
 if [ -z "$DISABLE_ACTIVATION" ]; then
 
-  # create symlink to new smbd
-  rm -f /usr/sbin/smbd
-  ln -s /usr/local/sbin/smbd /usr/sbin/smbd
-
-  # create symlink to new nmbd
-  rm -f /usr/sbin/nmbd
-  ln -s /usr/local/sbin/nmbd /usr/sbin/nmbd
+  # create symlink to new binaries
+  symlink_bin smbd
+  symlink_bin nmbd
+  symlink_bin winbindd
 
   # restart server if running
   /etc/init.d/samba status &>/dev/null && /etc/init.d/samba restart || :
 fi
+
+# rebuild ld.so.cache (ignore errors)
+/sbin/ldconfig || :
 
 exit 0

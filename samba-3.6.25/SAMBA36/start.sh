@@ -30,9 +30,11 @@ set_symlink() {
 
 backup_file /usr/sbin/smbd
 backup_file /usr/sbin/nmbd
+backup_file /usr/sbin/winbindd
 
 set_symlink /usr/local/sbin/smbd /usr/sbin/smbd
 set_symlink /usr/local/sbin/nmbd /usr/sbin/nmbd
+set_symlink /usr/local/sbin/winbindd /usr/sbin/winbindd
 
 SMB2=$(grep "^${SERVICE}_SMB2=" /etc/default/services | sed "s/^${SERVICE}_SMB2=//")
 [ -z "$SMB2" ] && SMB2=1 || :

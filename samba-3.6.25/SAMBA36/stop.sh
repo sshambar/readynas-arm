@@ -30,6 +30,7 @@ if ! [ "$ENABLED" = 1 ]; then
 
   remove_symlink /usr/local/sbin/smbd /usr/sbin/smbd
   remove_symlink /usr/local/sbin/nmbd /usr/sbin/nmbd
+  remove_symlink /usr/local/sbin/winbindd /usr/sbin/winbindd
 
   if grep -qs "^include = $SAMBA_ADDON_HOME/${SERVICE}.conf" $SAMBA_ADDON_HOME/addons.conf; then
     sed -i "/^include = ${SAMBA_ADDON_HOME//\//\/}\/${SERVICE}.conf/d" $SAMBA_ADDON_HOME/addons.conf

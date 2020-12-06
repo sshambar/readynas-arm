@@ -1,7 +1,7 @@
 <addon>
   <name>SAMBA36</name>
   <friendly_name>Samba 36</friendly_name>
-  <version>3.6.25-1</version>
+  <version>3.6.25-2</version>
   <author>Scott Shambarger</author>
   <description>
     <en-us>
@@ -9,7 +9,7 @@
     </en-us>
   </description>
   <detail_url>https://github.com/sshambar/readynas-arm/</detail_url>
-  <download_url>https://github.com/sshambar/readynas-arm/releases/download/Samba36-3.6.25-1/Samba36_3.6.25-1.bin</download_url>
+  <download_url>https://github.com/sshambar/readynas-arm/releases/download/Samba36-3.6.25-2/Samba36_3.6.25-2.bin</download_url>
   <icon>https://github.com/sshambar/readynas-arm/releases/download/samba-addon/SAMBA36.jpg</icon>
   <min_raidiator_version>5.3.1</min_raidiator_version>
 </addon>

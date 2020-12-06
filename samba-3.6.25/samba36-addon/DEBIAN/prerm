@@ -21,11 +21,17 @@ remove_symlink() {
 
 remove_symlink /usr/local/sbin/smbd /usr/sbin/smbd
 remove_symlink /usr/local/sbin/nmbd /usr/sbin/nmbd
+remove_symlink /usr/local/sbin/winbindd /usr/sbin/winbindd
 
-# restart if changes
+# stop daemon if changes
 if [ -n "$RESTART" ]; then
-  [ -n "$STOP" ] && ACTION=stop || ACTION=restart
-  /etc/init.d/samba status &>/dev/null && /etc/init.d/samba $ACTION || :
+  if /etc/init.d/samba status &>/dev/null; then
+    /etc/init.d/samba stop || :
+    # flag postrm to start samba if old binaries were restored
+    [ -n "$STOP" ] && rm -f /tmp/samba36-addon.start || touch /tmp/samba36-addon.start
+  else
+    rm -f /tmp/samba36-addon.start
+  fi
 fi
 
 exit 0

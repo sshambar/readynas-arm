@@ -15,6 +15,7 @@ check_symlink() {
 
 check_symlink /usr/local/sbin/smbd /usr/sbin/smbd
 check_symlink /usr/local/sbin/nmbd /usr/sbin/nmbd
+check_symlink /usr/local/sbin/winbindd /usr/sbin/winbindd
 
 [ -z "$HAS_SYMLINK" ] && exit 1
 

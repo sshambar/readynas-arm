@@ -2,7 +2,7 @@
 <addon>
   <name>SAMBA36</name>
   <friendly_name>Samba 36</friendly_name>
-  <version>3.6.25-1</version>
+  <version>3.6.25-2</version>
   <detail_url>https://github.com/sshambar/readynas-arm/</detail_url>
   <author>Scott Shambarger</author>
   <get_url>SAMBA36_HANDLER.pl</get_url>

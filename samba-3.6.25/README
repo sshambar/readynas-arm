@@ -19,8 +19,8 @@ results), and then supplied to the build in a config.cache file.
 The configure parameters were chosen to provide as much of a
 "drop-in" replacement for the existing Samba server as possible,
 so that the existing Frontview config files could be used.
-As configured, only the smbd/nmbd binaries need to be replaced.  All
-other libraries and dependencies are located under /usr/local.
+As configured, only the smbd/nmbd/winbindd binaries need to be replaced.
+All other libraries and dependencies are located under /usr/local.
 
 The full configuration used for the Samba compilation are located
 in ../scripts/mods/samba3.mod and built with ../scripts/build
@@ -30,8 +30,10 @@ then just replace the original binaries in /usr/sbin (as root):
 
 mv /usr/sbin/smbd /usr/sbin/smbd.orig
 mv /usr/sbin/nmbd /usr/sbin/nmbd.orig
+mv /usr/sbin/winbind /usr/sbin/winbindd.orig
 ln -s /usr/local/sbin/smbd /usr/sbin/smbd
 ln -s /usr/local/sbin/nmbd /usr/sbin/nmbd
+ln -s /usr/local/sbin/winbindd /usr/sbin/winbindd
 
 and then restart the server:
 

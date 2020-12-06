@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -e
+
+[ "$1" = remove ] || exit 0
+
+# update ld.so.cache (so old libraries are removed)
+/sbin/ldconfig || :
+
+if [ -f /tmp/samba36-addon.start ]; then
+  /etc/init.d/samba start || :
+fi
+
+rm -f /tmp/samba36-addon.start
+
+exit 0

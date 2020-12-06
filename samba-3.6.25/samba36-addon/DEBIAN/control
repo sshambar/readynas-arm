@@ -3,7 +3,7 @@ Priority: extra
 Section: checkinstall
 Maintainer: Scott Shambarger <devel@shambarger.net>
 Architecture: armel
-Version: 3.6.25-1
+Version: 3.6.25-2
 Depends: samba-common
 Description: Alternative Samba Suite for ReadyNAS
  Provides an alternative Samba Suite installed in /usr/local that
