@@ -92,7 +92,8 @@ mods/<name>.mod files must define the following 5 functions:
 
   install() - install to DESTDIR
 
-    Should call need_install <file>, then perform make install, eg:
+    Should call need_install <file> (allows destdir cleanup)
+    then perform make install, eg:
 
       need_install /usr/include/installed_header.h || return 0
       $DESTDIR_SUDO make install DESTDIR=$DESTDIR
